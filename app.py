@@ -39,19 +39,18 @@ with open(index_file_path, "r") as index_file:
 logger.info(f"Found {len(paths)} paths to fetch")
 logger.info(f"Paths to fetch: {paths}")
 
-# TODO: Pending to implement root directories for master ("/") and development ("dev.sistemaclubice.net")
-ENV = os.getenv("ENV")
-
 logger.info("Connecting to FTP server...")
 local_path = os.getenv("LOCAL_FILES_PATH")
 ftp_server = os.getenv("FTP_SERVER")
 ftp_user = os.getenv("FTP_USER")
 ftp_password = os.getenv("FTP_PASSWORD")
 
+remote_path = os.getenv("MAIN_REMOTE_PATH")
+
 with FTP(ftp_server) as ftp:
   ftp.login(ftp_user, ftp_password)
   logger.info("Connected to FTP server. Moving to root directory.")
-  ftp.cwd('/')
+  ftp.cwd(f"{remote_path}")
   for path in paths:
     directory, filename = path.rsplit('/', 1)
     ftp.cwd(directory)
@@ -64,7 +63,7 @@ with FTP(ftp_server) as ftp:
     with open(local_file, 'wb') as f:
       logger.info(f"Retrieving {filename} from FTP server, and updating local file in local path")
       ftp.retrbinary(f'RETR {filename}', f.write)  
-    ftp.cwd('/')
+    ftp.cwd(f"{remote_path}")
     
 logger.info("Finished fetching files")
   
